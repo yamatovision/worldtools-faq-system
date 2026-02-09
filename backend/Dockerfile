@@ -2,10 +2,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (gcc, libpq for psycopg2, libreoffice for PPTX/KEY→PDF conversion)
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    libreoffice-core \
+    libreoffice-impress \
+    libreoffice-writer \
+    fonts-noto-cjk \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for caching
