@@ -13,7 +13,6 @@ import {
   CheckCircle as CheckIcon,
   Close as CloseIcon,
   ArrowForward as ArrowForwardIcon,
-  Groups as GroupsIcon,
   FormatQuote as FormatQuoteIcon,
   AccessTime as AccessTimeIcon,
   Shield as ShieldIcon,
@@ -108,7 +107,7 @@ const PAIN_POINTS = [
     title: 'パッケージ型は月額20万が毎年続く',
     stat: '年240万円',
     statLabel: '月額20万×12ヶ月の場合',
-    description: '初期費用は100万以下で安く見えるが、月額20万の継続課金が重い。さらにナレッジ登録にプラン別の上限あり。全マニュアルを入れきれず、中途半端な運用になりがち。',
+    description: '初期費用は安く見えても、月額20万の継続課金が重い。さらにナレッジ登録にプラン別の上限あり。全マニュアルを入れきれず、中途半端な運用になりがち。',
   },
 ];
 
@@ -169,18 +168,7 @@ const COMPARISON_ROWS = [
   { label: 'ナレッジ登録上限', ours: '上限なし', others: 'プラン別に数百件制限', oursOk: true, othersOk: false },
   { label: '24時間対応', ours: 'AI常時稼働', others: '営業時間内のみ', oursOk: true, othersOk: false },
   { label: 'SSO認証', ours: 'Okta/Entra ID 標準搭載', others: 'オプション/追加費用', oursOk: true, othersOk: false },
-  { label: '料金体系', ours: '買い切り（ID課金・月額課金なし）', others: '月額課金型（年間継続）', oursOk: true, othersOk: false },
   { label: 'データの所有権・管理', ours: 'お客様の統合ナレッジベース', others: 'ベンダークラウドに閉じ込め', oursOk: true, othersOk: false },
-  { label: '200店舗規模の年間コスト', ours: '買い切り100万（税込）+ インフラ実費のみ', others: '年240〜600万円（毎年継続課金）', oursOk: true, othersOk: false },
-];
-
-// 3年間の累計コスト比較（万円）
-const COST_3YEAR = [
-  { label: '社内問い合わせ対応の人件費（現状）', sub: '200店舗+本社→各部署へ1日20件×15分', y1: 360, y2: 360, y3: 360, color: '#78909c', isHumanCost: true },
-  { label: 'パッケージ型チャットボット', sub: '月額約20万〜', y1: 240, y2: 240, y3: 240, color: '#d32f2f' },
-  { label: 'Helpfeel', sub: '伴走型・個別見積り', y1: 600, y2: 500, y3: 500, color: '#ff9800' },
-  { label: 'PKSHA FAQ', sub: '初期130万+月額10万〜', y1: 250, y2: 120, y3: 120, color: '#ffa726' },
-  { label: '本サービス', sub: '買い切り100万（税込）+インフラ実費', y1: 160, y2: 60, y3: 60, color: BRAND.accent, highlight: true },
 ];
 
 export function LandingPage() {
@@ -1020,88 +1008,6 @@ export function LandingPage() {
                 {i < COMPARISON_ROWS.length - 1 && <Divider />}
               </Box>
             ))}
-          </Paper>
-        </Container>
-      </Box>
-
-      {/* ===== TCO Comparison Section ===== */}
-      <Box sx={{ bgcolor: BRAND.bg, py: { xs: 8, md: 12 } }}>
-        <Container maxWidth="md">
-          <Box sx={{ textAlign: 'center', mb: 6 }}>
-            <Typography variant="overline" sx={{ color: BRAND.primary, fontWeight: 700, letterSpacing: '0.15em' }}>
-              COST
-            </Typography>
-            <Typography variant="h2" sx={{ mt: 1, fontWeight: 700, color: BRAND.dark, fontSize: { xs: '1.6rem', md: '2rem' } }}>
-              <GroupsIcon sx={{ fontSize: 32, verticalAlign: 'middle', mr: 1, color: BRAND.primary }} />
-              3年間の総コスト比較
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 2, color: '#545454' }}>
-              他社は毎年数百万円の継続課金。本サービスは買い切り100万円（税込）、2年目以降はインフラ実費（年約60万円）のみ。
-            </Typography>
-          </Box>
-
-          {/* 3年コスト比較テーブル */}
-          <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', border: '1px solid #e5e5e5' }}>
-            {/* ヘッダー */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr', bgcolor: BRAND.dark, color: BRAND.white, py: 1.5, px: 2 }}>
-              <Typography variant="caption" sx={{ fontWeight: 700 }}>サービス</Typography>
-              <Typography variant="caption" sx={{ fontWeight: 700, textAlign: 'right' }}>1年目</Typography>
-              <Typography variant="caption" sx={{ fontWeight: 700, textAlign: 'right' }}>2年目</Typography>
-              <Typography variant="caption" sx={{ fontWeight: 700, textAlign: 'right' }}>3年目</Typography>
-              <Typography variant="caption" sx={{ fontWeight: 700, textAlign: 'right' }}>3年合計</Typography>
-            </Box>
-            {/* データ行 */}
-            {COST_3YEAR.map((item: { label: string; sub: string; y1: number; y2: number; y3: number; color: string; highlight?: boolean; isHumanCost?: boolean }, i: number) => {
-              const total = item.y1 + item.y2 + item.y3;
-              return (
-                <Box
-                  key={item.label}
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1fr',
-                    py: 1.5,
-                    px: 2,
-                    bgcolor: item.isHumanCost ? 'rgba(120,144,156,0.08)' : item.highlight ? 'rgba(77,179,22,0.06)' : i % 2 === 0 ? '#fafafa' : BRAND.white,
-                    borderBottom: item.isHumanCost ? '3px solid #ccc' : '1px solid #eee',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: item.highlight || item.isHumanCost ? 700 : 500, color: item.isHumanCost ? '#546e7a' : item.highlight ? BRAND.primary : BRAND.dark, fontSize: '0.8rem' }}>
-                      {item.label}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#999', fontSize: '0.7rem' }}>{item.sub}</Typography>
-                  </Box>
-                  <Typography variant="body2" sx={{ textAlign: 'right', fontWeight: item.highlight ? 700 : 400, color: item.isHumanCost ? '#546e7a' : item.highlight ? BRAND.accent : '#333', fontSize: '0.85rem' }}>
-                    {item.y1}万円
-                  </Typography>
-                  <Typography variant="body2" sx={{ textAlign: 'right', fontWeight: item.highlight ? 700 : 400, color: item.isHumanCost ? '#546e7a' : item.highlight ? BRAND.accent : '#333', fontSize: '0.85rem' }}>
-                    {item.y2}万円
-                  </Typography>
-                  <Typography variant="body2" sx={{ textAlign: 'right', fontWeight: item.highlight ? 700 : 400, color: item.isHumanCost ? '#546e7a' : item.highlight ? BRAND.accent : '#333', fontSize: '0.85rem' }}>
-                    {item.y3}万円
-                  </Typography>
-                  <Typography variant="body2" sx={{ textAlign: 'right', fontWeight: 700, color: item.highlight ? BRAND.accent : item.color, fontSize: '0.95rem' }}>
-                    {total.toLocaleString()}万円
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Paper>
-
-          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#999', textAlign: 'right' }}>
-            ※ 各社公開料金に基づく概算。人件費は1日20件×15分×時給3,000円×月20日で試算。本サービスのインフラ実費はAI API・DB・ホスティング含む。
-          </Typography>
-
-          {/* 買い切りに含まれるもの */}
-          <Paper elevation={0} sx={{ mt: 3, p: 3, borderRadius: 3, bgcolor: 'rgba(196,30,58,0.05)', border: '1px solid rgba(196,30,58,0.12)' }}>
-            <Typography variant="body2" sx={{ color: BRAND.dark, fontWeight: 700, mb: 1 }}>
-              買い切り100万円（税込）に含まれるもの
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#545454', lineHeight: 1.8, display: 'block' }}>
-              システム一式（AI FAQ・管理画面・さくらクラウド連携・SSO・品質改善エージェント）の構築・導入支援・初期設定をすべて含みます。
-              納品後の月額ライセンス費・ID課金は一切ありません。AI API・データベース・ホスティングのインフラ実費（月額約5万円）のみ御社で直接ご契約いただく形です。
-            </Typography>
           </Paper>
         </Container>
       </Box>
