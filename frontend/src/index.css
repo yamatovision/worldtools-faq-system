@@ -1,0 +1,28 @@
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Root settings - fonts only */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Body - minimal settings */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  /* DO NOT add display: flex or place-items here - conflicts with MUI */
+}
+
+/* Root element */
+#root {
+  min-height: 100vh;
+}

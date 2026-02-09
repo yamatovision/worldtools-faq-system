@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3300",
+      "localStorage": [
+        {
+          "name": "tomoe_user",
+          "value": "{\"id\":\"22dbfef3-d058-4258-bfde-43ae6d9509c7\",\"email\":\"admin@example.com\",\"name\":\"鈴木 花子\",\"departmentId\":\"bdef71ac-a0c2-4c46-bb67-5ea021a5b7be\",\"departmentName\":\"事務局\",\"role\":\"admin\"}"
+        },
+        {
+          "name": "tomoe_access_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMmRiZmVmMy1kMDU4LTQyNTgtYmZkZS00M2FlNmQ5NTA5YzciLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzcwMzQxNTc4fQ.22Eu0l3mjdEVX69eOKhX0BkDZzQeT_tbJNo3CvH33U8"
+        }
+      ]
+    }
+  ]
+}

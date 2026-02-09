@@ -1,0 +1,42 @@
+# Environment
+.env.local
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+backend/.venv/
+backend/venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sw?
+
+# Uploads (user files)
+backend/uploads/
+
+# Test artifacts
+frontend/tests/temp/
+test-results/
+playwright-report/
+
+# Misc
+*.log
+.tiktoken_cache/
+frontend/.git.bak/
+.playwright-mcp/
