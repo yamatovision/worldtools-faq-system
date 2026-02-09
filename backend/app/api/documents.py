@@ -12,7 +12,7 @@ from app.core.database import get_db
 from app.core.auth import get_current_user_optional, get_current_admin, get_current_org_id, get_current_org_id_optional
 from app.services.rag import rag_service
 from app.services.document_processor import document_processor
-from app.services.box_service import box_service, get_box_service_for_org
+from app.services.sftp_service import get_sftp_service_for_org, SFTPService
 from app.models.document import Document, DocumentChunk, Department, User
 
 UPLOADS_BASE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
@@ -342,57 +342,57 @@ async def download_document(
 
 
 # ==============================
-# BOX連携エンドポイント
+# SFTP（さくらクラウド）連携エンドポイント
 # ==============================
 
 
 @router.get("/box/configured")
-async def box_configured(
+async def sftp_configured(
     db: Session = Depends(get_db),
     org_id: Optional[str] = Depends(get_current_org_id_optional),
 ):
-    """BOX連携が設定済みかどうかを返す"""
-    svc = get_box_service_for_org(db, org_id) if org_id else box_service
+    """SFTP連携が設定済みかどうかを返す"""
+    svc = get_sftp_service_for_org(db, org_id) if org_id else SFTPService()
     return {"configured": svc.is_configured}
 
 
 @router.get("/box/folders")
-async def box_list_folders(
-    parent_id: str = "0",
+async def sftp_list_folders(
+    parent_id: str = "/",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin),
 ):
-    """BOXフォルダ一覧（管理者のみ）"""
-    svc = get_box_service_for_org(db, current_user.organization_id)
+    """SFTPフォルダ一覧（管理者のみ）"""
+    svc = get_sftp_service_for_org(db, current_user.organization_id)
     if not svc.is_configured:
-        raise HTTPException(status_code=400, detail="BOX連携が設定されていません")
+        raise HTTPException(status_code=400, detail="SFTP接続情報が設定されていません")
     try:
         return svc.list_folders(parent_id)
     except Exception as e:
-        logger.error(f"BOX list_folders error: {e}")
-        raise HTTPException(status_code=502, detail=f"BOXとの通信に失敗しました: {str(e)}")
+        logger.error(f"SFTP list_folders error: {e}")
+        raise HTTPException(status_code=502, detail=f"サーバーとの通信に失敗しました: {str(e)}")
 
 
-@router.get("/box/files/{folder_id}")
-async def box_list_files(
+@router.get("/box/files/{folder_id:path}")
+async def sftp_list_files(
     folder_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin),
 ):
-    """BOXフォルダ内ファイル一覧（管理者のみ）+ 同期状態付き"""
-    svc = get_box_service_for_org(db, current_user.organization_id)
+    """SFTPフォルダ内ファイル一覧（管理者のみ）+ 同期状態付き"""
+    svc = get_sftp_service_for_org(db, current_user.organization_id)
     if not svc.is_configured:
-        raise HTTPException(status_code=400, detail="BOX連携が設定されていません")
+        raise HTTPException(status_code=400, detail="SFTP接続情報が設定されていません")
     try:
-        files = svc.list_files(folder_id)
+        files = svc.list_files(f"/{folder_id}")
     except Exception as e:
-        logger.error(f"BOX list_files error: {e}")
-        raise HTTPException(status_code=502, detail=f"BOXとの通信に失敗しました: {str(e)}")
+        logger.error(f"SFTP list_files error: {e}")
+        raise HTTPException(status_code=502, detail=f"サーバーとの通信に失敗しました: {str(e)}")
 
     # DB上の同期状態を照合
-    box_file_ids = [f["id"] for f in files]
+    file_paths = [f["id"] for f in files]
     synced_docs = db.query(Document.box_file_id, Document.box_sync_status).filter(
-        Document.box_file_id.in_(box_file_ids),
+        Document.box_file_id.in_(file_paths),
         Document.organization_id == current_user.organization_id,
     ).all()
     sync_map = {d.box_file_id: d.box_sync_status for d in synced_docs}
@@ -404,30 +404,30 @@ async def box_list_files(
 
 
 @router.post("/box/sync")
-async def box_sync_files(
+async def sftp_sync_files(
     request: BoxSyncRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin),
 ):
-    """BOXファイル同期実行（管理者のみ）"""
-    svc = get_box_service_for_org(db, current_user.organization_id)
+    """SFTPファイル同期実行（管理者のみ）"""
+    svc = get_sftp_service_for_org(db, current_user.organization_id)
     if not svc.is_configured:
-        raise HTTPException(status_code=400, detail="BOX連携が設定されていません")
+        raise HTTPException(status_code=400, detail="SFTP接続情報が設定されていません")
 
     results = []
-    for file_id in request.file_ids:
+    for file_path in request.file_ids:
         try:
             doc = svc.sync_file(
                 db=db,
-                file_id=file_id,
+                file_path=file_path,
                 is_public=request.is_public,
                 department_ids=request.department_ids or None,
                 organization_id=current_user.organization_id,
             )
-            results.append({"file_id": file_id, "document_id": doc.id, "status": "synced"})
+            results.append({"file_id": file_path, "document_id": doc.id, "status": "synced"})
         except Exception as e:
-            logger.error(f"BOX sync error for {file_id}: {e}")
-            results.append({"file_id": file_id, "document_id": None, "status": "error", "detail": str(e)})
+            logger.error(f"SFTP sync error for {file_path}: {e}")
+            results.append({"file_id": file_path, "document_id": None, "status": "error", "detail": str(e)})
 
     return {"results": results}
 

@@ -32,7 +32,7 @@ export function PublicLayout({ children, maxWidth = 'sm', title }: PublicLayoutP
               letterSpacing: '0.1em',
             }}
           >
-            TOMOE
+            WorldTools
           </Typography>
           <Typography
             variant="subtitle2"

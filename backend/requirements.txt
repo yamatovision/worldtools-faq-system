@@ -30,6 +30,9 @@ email-validator==2.3.0
 # BOX API
 box-sdk-gen[jwt]>=1.17.0
 
+# SFTP (さくらクラウド連携)
+paramiko>=3.4.0
+
 # Load Testing
 locust>=2.32.0
 

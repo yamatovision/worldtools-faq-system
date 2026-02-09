@@ -387,36 +387,36 @@ async def update_settings(
     return {"success": True}
 
 
-# ==================== BOX接続テスト・ポーリング ====================
+# ==================== SFTP接続テスト・ポーリング ====================
 
 
 @router.post("/settings/box/test")
-async def box_test_connection(
+async def sftp_test_connection(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_admin),
     org_id: str = Depends(get_current_org_id),
 ):
-    """BOX接続テスト"""
-    from app.services.box_service import get_box_service_for_org
+    """SFTP接続テスト"""
+    from app.services.sftp_service import get_sftp_service_for_org
 
-    svc = get_box_service_for_org(db, org_id)
+    svc = get_sftp_service_for_org(db, org_id)
     if not svc.is_configured:
-        raise HTTPException(status_code=400, detail="BOX認証情報が設定されていません")
+        raise HTTPException(status_code=400, detail="SFTP接続情報が設定されていません")
     try:
-        folders = svc.list_folders("0")
-        return {"success": True, "message": f"接続成功（ルートフォルダ: {len(folders)}件）"}
+        result = svc.test_connection()
+        return {"success": True, "message": f"接続成功（{result['cwd']}: {result['items']}件）"}
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"BOX接続失敗: {str(e)}")
+        raise HTTPException(status_code=502, detail=f"SFTP接続失敗: {str(e)}")
 
 
 @router.post("/settings/box/poll-now")
-async def box_poll_now(
+async def sftp_poll_now(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_admin),
     org_id: str = Depends(get_current_org_id),
 ):
     """即時ポーリング実行"""
-    from app.services.box_poller import poll_org_changes
+    from app.services.sftp_poller import poll_org_changes
 
     result = poll_org_changes(db, org_id)
     return result

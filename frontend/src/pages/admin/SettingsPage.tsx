@@ -15,8 +15,6 @@ import {
   CircularProgress,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
-import BusinessIcon from '@mui/icons-material/Business';
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import SaveIcon from '@mui/icons-material/Save';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -192,84 +190,7 @@ export function SettingsPage() {
         )}
 
         <Grid container spacing={3}>
-          {/* 企業情報 */}
-          <Grid size={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <BusinessIcon color="primary" />
-                  企業情報
-                </Typography>
-                <Divider sx={{ mb: 3 }} />
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      fullWidth
-                      label="企業名"
-                      value={settings.companyName}
-                      onChange={(e) => handleChange('companyName', e.target.value)}
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Okta SSO設定 */}
-          <Grid size={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <VpnKeyIcon color="primary" />
-                  Okta SSO設定
-                </Typography>
-                <Divider sx={{ mb: 3 }} />
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Oktaドメイン・Client ID・Client Secretを設定すると、ログイン画面に「Okta SSOでログイン」が有効になります
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      fullWidth
-                      label="Oktaドメイン"
-                      value={settings.oktaDomain}
-                      onChange={(e) => handleChange('oktaDomain', e.target.value)}
-                      placeholder="company.okta.com"
-                      helperText="Oktaの組織ドメイン"
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      fullWidth
-                      label="Client ID"
-                      value={settings.oktaClientId}
-                      onChange={(e) => handleChange('oktaClientId', e.target.value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      fullWidth
-                      label="Client Secret"
-                      type="password"
-                      value={settings.oktaClientSecret}
-                      onChange={(e) => handleChange('oktaClientSecret', e.target.value)}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      fullWidth
-                      label="リダイレクトURI"
-                      value={`${window.location.origin}/login`}
-                      slotProps={{ input: { readOnly: true } }}
-                      helperText="Oktaアプリケーション設定のSign-in redirect URIsに登録してください"
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* BOX連携設定 */}
+          {/* さくらクラウド連携設定 */}
           <Grid size={12}>
             <Card>
               <CardContent>

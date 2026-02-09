@@ -20,7 +20,7 @@ limiter = Limiter(key_func=get_remote_address)
 _request_metrics = {"total": 0, "errors_5xx": 0, "errors_4xx": 0, "latency_sum": 0.0}
 from app.core.database import engine, Base
 from app.api import chat, documents, stats, auth, admin, admin_chat
-from app.services.box_poller import polling_loop
+from app.services.sftp_poller import polling_loop
 import app.models.organization  # noqa: F401
 import app.models.document  # noqa: F401
 import app.models.graph  # noqa: F401

@@ -22,9 +22,9 @@ import {
 } from '@mui/icons-material';
 
 const BRAND = {
-  primary: '#c41e3a',
-  primaryDark: '#9a1830',
-  primaryLight: '#e04858',
+  primary: '#0a85bc',
+  primaryDark: '#076999',
+  primaryLight: '#3da8d4',
   accent: '#4db316',
   dark: '#1a1a2e',
   darkSub: '#2d2d44',
@@ -36,40 +36,40 @@ const BRAND = {
 // --- Real Voice Data (ワールドツール想定) ---
 const REAL_VOICES = [
   {
-    quote: '200店舗分のマニュアルがPDFで散在していて、新人パートが自力で調べられない。結局ベテランに電話が集中する',
-    role: '店舗運営部 マネージャー',
-    company: 'ワールドツール（200店舗）',
-    pain: '情報分散',
+    quote: '社内ポータルに規定が全部あるのに、誰も自分で調べない。「有給休暇って何日？」みたいな電話が毎日各部署にかかってくる',
+    role: '情報システム部 担当者',
+    company: 'ワールドツール（200店舗+本社）',
+    pain: '電話問い合わせ',
   },
   {
-    quote: '工具の仕様や互換性の質問が毎日来る。カタログPDFの図表を見れば分かるのに、チャットボットが読み取れない',
-    role: '商品企画部 担当者',
-    company: 'ワールドツール（200店舗）',
-    pain: 'PDF図表',
+    quote: '業務マニュアルのPDFが膨大で、手動アップロードだけでも大変。RPA作らないとダメかなと思っていた',
+    role: '情報システム部 担当者',
+    company: 'ワールドツール（200店舗+本社）',
+    pain: 'PDF登録',
   },
   {
-    quote: 'パート社員は夕方シフトで質問したいが、本部は17時で終わり。翌日まで待たせることになる',
-    role: '人事部 部長',
-    company: 'ワールドツール（200店舗）',
-    pain: '時間外',
+    quote: 'お試しで入れたチャットボットの精度がイマイチ。かゆいところに手が届かない。出典も表示されない',
+    role: '情報システム部 担当者',
+    company: 'ワールドツール（200店舗+本社）',
+    pain: '精度不足',
   },
   {
-    quote: 'ID数で毎月課金されたら200店舗×数人でとても払えない。パッケージ型チャットボットは月20万もする',
+    quote: 'パッケージ型は初期費用は安いけど、月額20万が毎年続く。ナレッジ登録上限もあって全マニュアルは入りきらない',
     role: '経営企画部 担当者',
-    company: 'ワールドツール（200店舗）',
+    company: 'ワールドツール（200店舗+本社）',
     pain: 'コスト',
   },
   {
-    quote: '店舗ごとにマニュアルの置き場所がバラバラ。さくらクラウドのサーバーにあるけど検索性が悪い',
+    quote: 'さくらクラウドにマニュアルを全部置いているのに、チャットボット側に自動連携できない。二重管理が面倒',
     role: '情報システム部 担当者',
-    company: 'ワールドツール（200店舗）',
+    company: 'ワールドツール（200店舗+本社）',
     pain: '運用負荷',
   },
   {
-    quote: '接客マニュアルに書いてない「よくある質問」がある。ベテランの暗黙知を形式知にしたい',
-    role: '店舗運営部 マネージャー',
-    company: 'ワールドツール（200店舗）',
-    pain: '暗黙知',
+    quote: '問い合わせ先として担当者名が出てくる。結局そこに電話がかかってきて、チャットボットの意味がない',
+    role: '総務部 担当者',
+    company: 'ワールドツール（200店舗+本社）',
+    pain: '精度不足',
   },
 ];
 
@@ -77,38 +77,38 @@ const REAL_VOICES = [
 const PAIN_POINTS = [
   {
     icon: <SearchOffIcon sx={{ fontSize: 40 }} />,
-    title: '「結局、人に聞いた方が早い」',
-    stat: '62%',
-    statLabel: 'が精度に不満',
-    description: '自分の言葉で質問しても的外れな回答ばかり。パート社員は3回試して諦め、結局電話で問い合わせ。チャットボットを入れたのに問い合わせ件数が減らない悪循環に。',
+    title: '「ポータルに書いてあるのに電話してくる」',
+    stat: '200店舗',
+    statLabel: '+本社100人から毎日問い合わせ',
+    description: '社内ポータルにマニュアルも規定もある。でも自分の言葉で検索してヒットしないと、もう調べようとしない。「有給って何日？」「残業申請どうやるの？」――全部書いてあるのに、結局電話で聞いてくる。',
   },
   {
     icon: <PdfIcon sx={{ fontSize: 40 }} />,
     title: 'PDF内の図表・フロー図が読めない',
     stat: '78%',
     statLabel: 'が非対応と回答',
-    description: '工具カタログや店舗マニュアルの重要情報は図表やフロー図に集中。しかし既存サービスはテキストしか読めず、「製品スペック表」「組立手順図」は全て無視。PowerPoint・Keynoteに至っては対応すらしていないケースが大半。',
+    description: '業務マニュアルや社内規定の重要情報は図表やフロー図に集中。しかし既存チャットボットはテキストしか読めず、「申請フロー図」「組織図」は全て無視。結局AIの回答が不完全で信用されない。',
   },
   {
     icon: <BuildIcon sx={{ fontSize: 40 }} />,
     title: 'ドキュメント登録が手作業地獄',
-    stat: '月40時間',
-    statLabel: 'の管理工数',
-    description: 'PDFを1個1個手動でアップロード。更新のたびにダウンロード→再アップロード→再学習。さくらクラウドに入れたら自動で反映してほしいのに。',
+    stat: '膨大な',
+    statLabel: 'PDF数を1個ずつ手動アップロード',
+    description: 'さくらクラウドに全マニュアルがあるのに、チャットボットに1個1個アップロードし直す必要がある。更新のたびにダウンロード→再アップロード→再学習。RPAを組まないと回らない状態。',
   },
   {
     icon: <TrendingDownIcon sx={{ fontSize: 40 }} />,
-    title: '3ヶ月で使われなくなる',
+    title: '精度が低くて使われなくなる',
     stat: '3ヶ月',
     statLabel: 'で利用率50%低下',
-    description: '導入直後は話題になるが、精度の低さと出典不明の回答に失望して利用離れ。「回答の根拠がわからない」「担当者の名前が出てくる＝結局そこに電話が来る」が現実。',
+    description: '導入直後は話題になるが、精度の低さと出典不明の回答に失望して利用離れ。「回答の根拠がわからない」「問い合わせ先として担当者名が出る＝結局そこに電話が来る」。チャットボットの意味がない。',
   },
   {
     icon: <MoneyOffIcon sx={{ fontSize: 40 }} />,
-    title: 'パッケージ型チャットボットは高い',
+    title: 'パッケージ型は月額20万が毎年続く',
     stat: '年240万円',
     statLabel: '月額20万×12ヶ月の場合',
-    description: '国内主要FAQサービスの月額相場は10〜20万円。PKSHA FAQは初期130万+月額10万〜。sAI Searchは月額19.8万。さらにID課金・データ上限・追加開発費。200店舗への全社展開を諦め一部だけに留まるのが現実。',
+    description: '初期費用は100万以下で安く見えるが、月額20万の継続課金が重い。さらにナレッジ登録にプラン別の上限あり。全マニュアルを入れきれず、中途半端な運用になりがち。',
   },
 ];
 
@@ -118,14 +118,14 @@ const FEATURES = [
     icon: <PsychologyIcon sx={{ fontSize: 48, color: BRAND.primary }} />,
     title: 'Claude Sonnet 直接推論',
     subtitle: '最先端AIによる高精度回答',
-    description: '世界最高水準のAIモデルが社内ドキュメントを直接読み解き回答。「この電動ドリルと互換性のあるビットは？」のような複数カタログにまたがる質問も、横断的に理解して正確に回答します。',
+    description: '世界最高水準のAIモデルが社内規定・業務マニュアルを直接読み解き回答。「有給休暇は年何日？」「残業申請の手順は？」のような質問に、規定の根拠を示しながら正確に回答します。',
     badge: '最先端AI搭載',
   },
   {
     icon: <DocumentScannerIcon sx={{ fontSize: 48, color: BRAND.primary }} />,
     title: '14形式対応・図表の高精度認識',
     subtitle: 'Claude Vision AI + LibreOffice変換',
-    description: 'PDF・Word・Excel・PowerPoint・Keynoteなど14形式に対応。カタログPDFの製品スペック表、組立手順図、フロー図を97%の精度で認識。テキストだけでなく視覚情報も完全に理解します。',
+    description: 'PDF・Word・Excel・PowerPoint・Keynoteなど14形式に対応。業務マニュアルの申請フロー図、組織図、規定内の表を97%の精度で認識。テキストだけでなく視覚情報も完全に理解します。',
     badge: '14形式対応',
   },
   {
@@ -145,15 +145,15 @@ const FEATURES = [
   {
     icon: <PsychologyIcon sx={{ fontSize: 48, color: BRAND.primary }} />,
     title: 'AI品質改善エージェント',
-    subtitle: 'マニュアルにない暗黙知を自動補完',
-    description: '回答できなかった質問や低評価の回答をAIが自動分析し、「頻繁に聞かれるがマニュアルに書いていない」暗黙知を特定。不足ドキュメントをWord文書として自動生成し、ナレッジベースに追加できます。',
+    subtitle: '規定にない「よくある質問」を自動補完',
+    description: '回答できなかった質問や低評価の回答をAIが自動分析し、「頻繁に聞かれるが規定に書いていない」情報を特定。不足ドキュメントをWord文書として自動生成し、ナレッジベースに追加できます。',
     badge: 'ドキュメント自動生成',
   },
   {
     icon: <SecurityIcon sx={{ fontSize: 48, color: BRAND.primary }} />,
     title: '部門別アクセス制御 + SSO',
     subtitle: 'Okta / Entra ID 標準搭載',
-    description: '店舗スタッフ・本部社員・管理者ごとにアクセス可能なドキュメントを制御。機密情報の漏洩リスクを排除し、既存のSSO基盤とシームレスに統合します。',
+    description: '店舗・本社部門ごとにアクセス可能なドキュメントを制御。人事規定は全社員、経理マニュアルは経理部のみ、といった柔軟な制御が可能。既存のSSO基盤とシームレスに統合します。',
     badge: 'エンタープライズ対応',
   },
 ];
@@ -176,7 +176,7 @@ const COMPARISON_ROWS = [
 
 // 3年間の累計コスト比較（万円）
 const COST_3YEAR = [
-  { label: '問い合わせ対応の人件費（現状）', sub: '1日20件×15分×時給3,000円', y1: 360, y2: 360, y3: 360, color: '#78909c', isHumanCost: true },
+  { label: '社内問い合わせ対応の人件費（現状）', sub: '200店舗+本社→各部署へ1日20件×15分', y1: 360, y2: 360, y3: 360, color: '#78909c', isHumanCost: true },
   { label: 'パッケージ型チャットボット', sub: '月額約20万〜', y1: 240, y2: 240, y3: 240, color: '#d32f2f' },
   { label: 'Helpfeel', sub: '伴走型・個別見積り', y1: 600, y2: 500, y3: 500, color: '#ff9800' },
   { label: 'PKSHA FAQ', sub: '初期130万+月額10万〜', y1: 250, y2: 120, y3: 120, color: '#ffa726' },
@@ -219,13 +219,13 @@ export function LandingPage() {
                 letterSpacing: '-0.02em',
               }}
             >
-              200店舗のナレッジを
+              社内規定・業務マニュアルを
               <br />
               <Box component="span" sx={{ color: '#e57373' }}>
                 AIが即座に回答。
               </Box>
               <br />
-              パート社員の対応品質が変わる。
+              各部署への電話問い合わせが激減する。
             </Typography>
             <Typography
               variant="h5"
@@ -237,9 +237,9 @@ export function LandingPage() {
                 fontSize: { xs: '0.95rem', md: '1.15rem' },
               }}
             >
-              工具カタログの図表が読めない。手動アップロードが面倒。出典が出ない。
+              ポータルに規定があるのに誰も調べない。結局電話で聞いてくる。
               <br />
-              3ヶ月で使われなくなる。月額20万のチャットボットは高すぎる。
+              パッケージ型チャットボットは精度が低い。出典も出ない。月額20万が毎年続く。
             </Typography>
             <Typography
               variant="h6"
@@ -251,9 +251,9 @@ export function LandingPage() {
                 fontSize: { xs: '0.95rem', md: '1.1rem' },
               }}
             >
-              Claude Sonnet AI + Agentic RAG + 14ファイル形式対応。
+              Claude Sonnet AI + Agentic RAG + さくらクラウド自動連携。
               <br />
-              200店舗でもID課金なし。御社の環境でお試しいただけます。
+              200店舗+本社100人。ID課金なし。御社の規定で即お試しいただけます。
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
@@ -372,7 +372,7 @@ export function LandingPage() {
               <Box component="span" sx={{ color: '#d32f2f' }}>失敗するのか</Box>
             </Typography>
             <Typography variant="body1" sx={{ mt: 2, color: '#545454', maxWidth: 640, mx: 'auto' }}>
-              PKSHA FAQ・Helpfeel・sAI Search等、国内14社以上のRAGチャットボットを調査。共通する5つの構造的問題。
+              パッケージ型チャットボットの導入を検討中の企業が直面する、5つの構造的問題。
             </Typography>
           </Box>
 
@@ -459,7 +459,7 @@ export function LandingPage() {
               variant="body1"
               sx={{ mt: 3, color: 'rgba(255,255,255,0.7)', maxWidth: 760, mx: 'auto', lineHeight: 1.9 }}
             >
-              FAQ ベンダー A に店舗マニュアル、チャットボット B に商品データ、別システムに帳票データ。
+              FAQ ベンダー A に社内規定、チャットボット B に業務マニュアル、別システムに帳票データ。
               ベンダーごとにデータが閉じ込められると、AIエージェントは横断的にアクセスできません。
               <br />
               「全社的にAIを活用したい」のに、データが散らばっていては永遠にたどり着けません。
@@ -484,9 +484,9 @@ export function LandingPage() {
                 </Typography>
 
                 {[
-                  { vendor: 'FAQ ベンダー A のクラウド', data: '店舗マニュアル・業務手順書' },
-                  { vendor: 'チャットボット ベンダー B のクラウド', data: '商品FAQ・仕様データ' },
-                  { vendor: 'AI-OCR ベンダー C のクラウド', data: '請求書・帳票データ' },
+                  { vendor: 'FAQ ベンダー A のクラウド', data: '社内規定・就業規則' },
+                  { vendor: 'チャットボット ベンダー B のクラウド', data: '業務マニュアル・手順書' },
+                  { vendor: 'AI-OCR ベンダー C のクラウド', data: '申請書・帳票データ' },
                 ].map((item) => (
                   <Box key={item.vendor} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
                     <LockIcon sx={{ fontSize: 20, color: '#e57373', flexShrink: 0 }} />
@@ -501,7 +501,7 @@ export function LandingPage() {
 
                 {[
                   'AIエージェントが横断的にアクセスできない',
-                  '店舗ごとにサイロ化 → 全社AI化が進まない',
+                  '部門ごとにサイロ化 → 全社AI化が進まない',
                   'ベンダー乗り換え時にデータ移行が困難',
                   'データの所在・管理状況が不透明',
                 ].map((text) => (
@@ -541,8 +541,8 @@ export function LandingPage() {
                 </Typography>
 
                 {[
-                  { label: '全店舗のナレッジを一元管理', sub: 'さくらクラウド自動連携 + 14形式対応' },
-                  { label: '店舗・本部ごとのアクセス制御で機密性を確保', sub: 'Okta / Entra ID SSO 標準搭載' },
+                  { label: '全社の規定・マニュアルを一元管理', sub: 'さくらクラウド自動連携 + 14形式対応' },
+                  { label: '部門ごとのアクセス制御で機密性を確保', sub: 'Okta / Entra ID SSO 標準搭載' },
                   { label: 'AIエージェントが全データを横断検索', sub: 'Agentic RAG で自律的推論' },
                   { label: 'FAQ → 分析 → 資料生成、同じ基盤で拡張', sub: 'データを一度整えれば横展開は容易' },
                 ].map((item) => (
@@ -741,13 +741,13 @@ export function LandingPage() {
           {[
             {
               title: '利用統計ダッシュボード',
-              description: '質問数・満足度・回答失敗率をリアルタイムで可視化。回答失敗率をクリックするだけでAIドキュメント提案画面に直行し、不足ナレッジの補完をすぐに開始できます。',
+              description: '質問数・満足度・回答失敗率をリアルタイムで可視化。「どんな質問が多いか」「どの規定が参照されているか」を把握し、不足ナレッジの補完をすぐに開始できます。',
               image: '/screenshots/stats-page.png',
               alt: '利用統計ダッシュボード',
             },
             {
               title: 'AI品質改善エージェント',
-              description: '「マニュアルに書いてないけど頻繁に聞かれること」をAIが自動特定。不足ドキュメントを対話しながらWord文書として自動生成。ダウンロードしてそのままナレッジベースに追加できます。',
+              description: '「規定に書いてないけど頻繁に聞かれること」をAIが自動特定。不足ドキュメントを対話しながらWord文書として自動生成。ダウンロードしてそのままナレッジベースに追加できます。',
               image: '/screenshots/doc-assistant-analysis.png',
               image2: '/screenshots/doc-assistant-generate.png',
               label1: 'ナレッジギャップ分析',
@@ -762,7 +762,7 @@ export function LandingPage() {
             },
             {
               title: '部門別アクセス制御',
-              description: '店舗スタッフ・本部社員・管理者ごとにアクセス権限を設定。店舗専用の手順書は各店舗のみ、全社規定は全社員がアクセス可能。機密情報を適切に管理しながら、全社のナレッジ活用を推進。',
+              description: '店舗・本社部門・管理者ごとにアクセス権限を設定。人事規定は全社員、経理マニュアルは経理部のみ、といった柔軟な制御が可能。機密情報を適切に管理しながら、全社のナレッジ活用を推進。',
               image: '/screenshots/departments-page.png',
               alt: '部門管理画面',
             },
@@ -848,7 +848,7 @@ export function LandingPage() {
               {
                 icon: <AccessTimeIcon sx={{ fontSize: 36, color: BRAND.primaryLight }} />,
                 title: '24時間365日 AI常時稼働',
-                description: '営業時間外でも担当者不在でも、AIが即座に回答。夕方シフトのパート社員も、すぐに業務を進められます。',
+                description: '営業時間外でも担当者不在でも、AIが即座に回答。本社が17時で閉まった後も、店舗スタッフがすぐに規定を確認できます。',
               },
             ].map((item) => (
               <Grid size={{ xs: 12, md: 6 }} key={item.title}>
@@ -903,7 +903,7 @@ export function LandingPage() {
                 ))}
 
                 <Divider sx={{ my: 2.5 }} />
-                {['検索結果が的外れでもそのまま回答', '複数マニュアルの関係性を理解できない', '出典が表示されない/不安定', '回答できない質問の分析は全て手作業'].map((text) => (
+                {['検索結果が的外れでもそのまま回答', '複数の規定・マニュアルの関係性を理解できない', '出典が表示されない/不安定', '回答できない質問の分析は全て手作業'].map((text) => (
                   <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <CloseIcon sx={{ fontSize: 16, color: '#d32f2f' }} />
                     <Typography variant="caption" sx={{ color: '#999' }}>{text}</Typography>
@@ -942,7 +942,7 @@ export function LandingPage() {
                 ))}
 
                 <Divider sx={{ my: 2 }} />
-                {['AIがツールを自律選択し最適な情報を収集', '複数マニュアルにまたがる質問にも正確に回答', '参照元の自動引用で「根拠がわかる」回答', '回答失敗をAIが分析→不足ドキュメントを自動生成'].map((text) => (
+                {['AIがツールを自律選択し最適な情報を収集', '複数の規定・マニュアルにまたがる質問にも正確に回答', '参照元の自動引用で「根拠がわかる」回答', '回答失敗をAIが分析→不足ドキュメントを自動生成'].map((text) => (
                   <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <CheckIcon sx={{ fontSize: 16, color: BRAND.accent }} />
                     <Typography variant="caption" sx={{ color: '#333', fontWeight: 600 }}>{text}</Typography>
@@ -955,7 +955,7 @@ export function LandingPage() {
           {/* 具体例 */}
           <Paper elevation={0} sx={{ mt: 5, p: 4, borderRadius: 3, bgcolor: BRAND.white, border: '1px solid #e5e5e5' }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: BRAND.dark, mb: 2 }}>
-              例：「マキタのインパクトドライバーTD173Dに使える替えビットは？」
+              例：「有給休暇の申請方法を教えて。残日数の確認方法も知りたい」
             </Typography>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
@@ -964,7 +964,7 @@ export function LandingPage() {
                   <Box>
                     <Typography variant="caption" sx={{ color: '#999', fontWeight: 600 }}>従来型RAG</Typography>
                     <Typography variant="body2" sx={{ color: '#666', lineHeight: 1.7 }}>
-                      TD173Dの本体カタログ<b>だけ</b>を参照し、互換ビット情報が不完全。「詳しくはメーカーにお問い合わせください」で終了。
+                      就業規則の有給休暇の条文<b>だけ</b>を参照し、具体的な申請手順が不完全。「詳しくは人事部にお問い合わせください」で終了。結局電話する。
                     </Typography>
                   </Box>
                 </Box>
@@ -975,7 +975,7 @@ export function LandingPage() {
                   <Box>
                     <Typography variant="caption" sx={{ color: BRAND.primary, fontWeight: 600 }}>本サービス（Agentic RAG）</Typography>
                     <Typography variant="body2" sx={{ color: '#333', lineHeight: 1.7 }}>
-                      本体カタログ ⇔ ビットカタログ ⇔ 互換表を<b>AIが自律的に横断検索</b>し、対応ビットの型番・特徴・在庫情報を出典付きで回答。
+                      就業規則 ⇔ 有給申請マニュアル ⇔ システム操作手順書を<b>AIが自律的に横断検索</b>し、申請手順・残日数の確認方法・承認フローを出典付きで回答。
                     </Typography>
                   </Box>
                 </Box>
@@ -1117,9 +1117,9 @@ export function LandingPage() {
               ワールドツール様専用のデモ環境をご用意しました
             </Typography>
             <Typography variant="body1" sx={{ color: '#545454', lineHeight: 1.8, mb: 4 }}>
-              実際のシステムに触れて、AIの回答精度・さくらクラウド連携・部門別アクセス制御をご確認ください。
+              実際のシステムに触れて、AIの回答精度・出典表示・さくらクラウド連携をご確認ください。
               <br />
-              御社のドキュメントをアップロードして、すぐにお試しいただけます。
+              御社の社内規定・業務マニュアルをアップロードして、すぐにお試しいただけます。
             </Typography>
             <Button
               variant="contained"
