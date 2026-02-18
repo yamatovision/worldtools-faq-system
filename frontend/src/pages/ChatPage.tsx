@@ -15,12 +15,10 @@ import SendIcon from '@mui/icons-material/Send';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 import SearchIcon from '@mui/icons-material/Search';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AddIcon from '@mui/icons-material/Add';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
@@ -34,7 +32,7 @@ import {
   fetchSuggestions,
   type ChatMessage,
   type AgentStep,
-  type ChatReference,
+  type SourceCard,
 } from '@/services/api/chat';
 import { downloadDocument } from '@/services/api/documents';
 
@@ -50,8 +48,7 @@ interface Message {
   type: 'user' | 'ai';
   content: string;
   timestamp: Date;
-  references?: ChatReference[];
-  avgSimilarity?: number;
+  sources?: SourceCard[];
   feedback?: 'good' | 'bad' | null;
   steps?: AgentStep[];
   followups?: string[];
@@ -61,7 +58,6 @@ export function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [expandedRefs, setExpandedRefs] = useState<Set<string>>(new Set());
   const [showUserMessages, setShowUserMessages] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -69,15 +65,6 @@ export function ChatPage() {
   useEffect(() => {
     fetchSuggestions().then(setSuggestions);
   }, []);
-
-  const toggleRef = (key: string) => {
-    setExpandedRefs((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -89,7 +76,6 @@ export function ChatPage() {
 
   const handleNewConversation = () => {
     setMessages([]);
-    setExpandedRefs(new Set());
     setInput('');
   };
 
@@ -160,14 +146,20 @@ export function ChatPage() {
               return { ...msg, steps };
             })
           );
+        } else if (event.type === 'sources') {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId ? { ...msg, sources: event.sources } : msg
+            )
+          );
         }
         result = await generator.next();
       }
 
-      const { chatId, references, avgSimilarity, followups } = result.value;
+      const { chatId, followups } = result.value;
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === aiMessageId ? { ...msg, chatId, references, avgSimilarity, followups } : msg
+          msg.id === aiMessageId ? { ...msg, chatId, followups } : msg
         )
       );
     } catch (error) {
@@ -366,6 +358,57 @@ export function ChatPage() {
                       </Box>
                     )}
 
+                    {/* ソースカード（検索直後に即表示） */}
+                    {message.sources && message.sources.length > 0 && (
+                      <Box sx={{ mb: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <DescriptionIcon sx={{ fontSize: 14 }} />
+                          参照元ドキュメント
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                          {message.sources.map((src) => (
+                            <Paper
+                              key={src.document_id}
+                              variant="outlined"
+                              data-testid="source-card"
+                              sx={{
+                                p: 1.5,
+                                width: 260,
+                                borderLeft: `3px solid ${WT_COLORS.primary}`,
+                                backgroundColor: 'grey.50',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 0.5,
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Typography variant="caption" sx={{ fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {src.filename}
+                                </Typography>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => downloadDocument(src.document_id, src.filename)}
+                                  title="ダウンロード"
+                                  sx={{ p: 0.3, ml: 0.5 }}
+                                >
+                                  <FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />
+                                </IconButton>
+                              </Box>
+                              <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                {src.preview}
+                              </Typography>
+                              <Chip
+                                label={`類似度 ${Math.round(src.similarity * 100)}%`}
+                                size="small"
+                                color={src.similarity >= 0.7 ? 'success' : src.similarity >= 0.5 ? 'warning' : 'error'}
+                                sx={{ alignSelf: 'flex-start', height: 18, fontSize: '0.65rem' }}
+                              />
+                            </Paper>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+
                     {/* AI回答本体（Markdown） */}
                     <Paper
                       data-testid="ai-message"
@@ -429,83 +472,6 @@ export function ChatPage() {
                     {/* 回答完了後の追加情報 */}
                     {message.content && !isCurrentlyLoading && (
                       <Box sx={{ mt: 1.5 }}>
-                        {/* 参照元 */}
-                        {message.references && message.references.length > 0 && (
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}
-                            >
-                              <AttachFileIcon sx={{ fontSize: 14 }} />
-                              参照元:
-                              {message.avgSimilarity !== undefined && message.avgSimilarity > 0 && (
-                                <Chip
-                                  label={`類似度 ${Math.round(message.avgSimilarity * 100)}%`}
-                                  size="small"
-                                  color={message.avgSimilarity >= 0.7 ? 'success' : message.avgSimilarity >= 0.5 ? 'warning' : 'error'}
-                                  sx={{ ml: 1, height: 18, fontSize: '0.65rem' }}
-                                />
-                              )}
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                              {message.references.map((ref, refIdx) => {
-                                const refKey = `${message.id}-ref-${refIdx}`;
-                                const isExpanded = expandedRefs.has(refKey);
-                                const hasExcerpt = !!ref.excerpt;
-                                return (
-                                  <Box key={refIdx}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                      <Chip
-                                        label={
-                                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                            <span>{ref.title}{ref.section ? ` (${ref.section})` : ''}</span>
-                                            {hasExcerpt && (isExpanded ? <ExpandLessIcon sx={{ fontSize: 14 }} /> : <ExpandMoreIcon sx={{ fontSize: 14 }} />)}
-                                          </Box>
-                                        }
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={hasExcerpt ? () => toggleRef(refKey) : undefined}
-                                        sx={{
-                                          fontSize: '0.7rem',
-                                          cursor: hasExcerpt ? 'pointer' : 'default',
-                                          '&:hover': hasExcerpt ? { backgroundColor: 'action.hover' } : {},
-                                        }}
-                                      />
-                                      {ref.id && (
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => downloadDocument(ref.id, ref.title || 'document')}
-                                          title="元ファイルをダウンロード"
-                                          sx={{ p: 0.3 }}
-                                        >
-                                          <FileDownloadOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                                        </IconButton>
-                                      )}
-                                    </Box>
-                                    {isExpanded && ref.excerpt && (
-                                      <Paper
-                                        variant="outlined"
-                                        sx={{
-                                          mt: 0.5,
-                                          p: 1.5,
-                                          backgroundColor: 'grey.50',
-                                          borderLeft: `3px solid ${WT_COLORS.primary}`,
-                                          fontSize: '0.8rem',
-                                        }}
-                                      >
-                                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                                          {ref.excerpt}
-                                        </Typography>
-                                      </Paper>
-                                    )}
-                                  </Box>
-                                );
-                              })}
-                            </Box>
-                          </Box>
-                        )}
-
                         {/* フィードバック + フォローアップ */}
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

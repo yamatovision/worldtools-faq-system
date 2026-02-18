@@ -55,42 +55,6 @@ TOOLS = [
         },
     },
     {
-        "name": "cite_sources",
-        "description": "回答に使用した出典を登録します。回答を生成する直前に必ず呼んでください。回答で参照するドキュメントとその該当箇所を正確に記録します。",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "citations": {
-                    "type": "array",
-                    "description": "引用元のリスト",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "document_id": {
-                                "type": "string",
-                                "description": "ドキュメントID（search_knowledgeの結果から取得）",
-                            },
-                            "filename": {
-                                "type": "string",
-                                "description": "ドキュメント名",
-                            },
-                            "section": {
-                                "type": "string",
-                                "description": "参照した章・条項（例: 第20条、第3章）",
-                            },
-                            "excerpt": {
-                                "type": "string",
-                                "description": "回答の根拠となった箇所の要約または引用（100文字程度）",
-                            },
-                        },
-                        "required": ["document_id", "filename", "excerpt"],
-                    },
-                },
-            },
-            "required": ["citations"],
-        },
-    },
-    {
         "name": "suggest_followups",
         "description": "ユーザーが次に聞きそうな関連質問を提案します。回答を生成した後に必ず呼んでください。回答内容に関連する具体的で有用な質問を2〜3個提案します。",
         "input_schema": {
@@ -112,7 +76,7 @@ SYSTEM_PROMPT = """あなたは社内FAQアシスタントです。社員から�
 【行動手順】
 1. まず search_knowledge で質問に関連する情報を検索する
 2. 検索結果が不十分な場合は、別の切り口で再検索するか、get_document_detail でドキュメント全文を確認する
-3. 十分な情報が集まったら、cite_sources と suggest_followups を同時に呼んでから回答を生成する
+3. 十分な情報が集まったら、suggest_followups を呼んでから回答を生成する
 
 【回答のルール】
 1. 検索で得た情報のみに基づいて回答する。推測や一般知識で補わない
@@ -121,8 +85,7 @@ SYSTEM_PROMPT = """あなたは社内FAQアシスタントです。社員から�
 4. 必要に応じて箇条書きや番号付きリストを使用する
 
 【出典の明示 ※必須】
-- 回答する前に必ず cite_sources ツールを呼んで、参照したドキュメントと該当箇所を登録する
-- 回答文中でも出典を自然に言及する
+- 回答文中で出典を自然に言及する（参照元ドキュメントはソースカードとして自動表示されます）
   - 良い例:「**就業規則（第20条）** によると、年次有給休暇は入社6ヶ月経過後に10日付与されます。」
   - 良い例:「**出張旅費規程** では、日帰り出張の日当は管理職3,000円、一般社員2,000円と定められています。」
 - 複数のドキュメントを参照した場合はそれぞれの出典を明記する
@@ -166,8 +129,8 @@ class AgenticRAG:
         self.organization_id = organization_id
         self.user_department_id = user_department_id
         self.client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
-        self._citations: list[dict] = []
-        self._all_similarities: list[float] = []
+        self._sources: list[dict] = []
+        self._seen_doc_ids: set[str] = set()
         self._trace: list[dict] = []
         self._followups: list[str] = []
 
@@ -180,8 +143,6 @@ class AgenticRAG:
             return self._tool_get_document_detail(input_data["document_id"])
         elif name == "list_documents":
             return self._tool_list_documents()
-        elif name == "cite_sources":
-            return self._tool_cite_sources(input_data["citations"])
         elif name == "suggest_followups":
             return self._tool_suggest_followups(input_data["questions"])
         return json.dumps({"error": f"Unknown tool: {name}"})
@@ -192,21 +153,26 @@ class AgenticRAG:
             user_department_id=self.user_department_id,
             organization_id=self.organization_id,
         )
-        for chunk in chunks:
-            sim = chunk.get("similarity")
-            if sim is not None:
-                self._all_similarities.append(sim)
         if not chunks:
             return json.dumps({"results": [], "message": "該当する情報が見つかりませんでした。"}, ensure_ascii=False)
-        results = [
-            {
-                "document_id": c["document_id"],
+        results = []
+        for c in chunks:
+            doc_id = c["document_id"]
+            sim = round(c["similarity"], 3) if c["similarity"] is not None else 0
+            results.append({
+                "document_id": doc_id,
                 "filename": c["filename"],
                 "content": c["content"],
-                "similarity": round(c["similarity"], 3) if c["similarity"] is not None else 0,
-            }
-            for c in chunks
-        ]
+                "similarity": sim,
+            })
+            if doc_id not in self._seen_doc_ids:
+                self._seen_doc_ids.add(doc_id)
+                self._sources.append({
+                    "document_id": doc_id,
+                    "filename": c["filename"],
+                    "preview": c["content"][:150],
+                    "similarity": sim,
+                })
         return json.dumps({"results": results}, ensure_ascii=False)
 
     def _tool_get_document_detail(self, document_id: str) -> str:
@@ -254,22 +220,6 @@ class AgenticRAG:
         ]
         return json.dumps({"documents": docs}, ensure_ascii=False)
 
-    def _tool_cite_sources(self, citations) -> str:
-        # streaming SDK may return nested objects as-is or with slight differences
-        parsed = []
-        for c in citations:
-            if isinstance(c, dict):
-                parsed.append(c)
-            elif isinstance(c, str):
-                try:
-                    obj = json.loads(c)
-                    if isinstance(obj, dict):
-                        parsed.append(obj)
-                except json.JSONDecodeError:
-                    pass
-        self._citations = parsed
-        return json.dumps({"status": "ok", "registered": len(parsed)}, ensure_ascii=False)
-
     def _tool_suggest_followups(self, questions: list[str]) -> str:
         self._followups = questions[:3]
         return json.dumps({"status": "ok", "count": len(self._followups)}, ensure_ascii=False)
@@ -283,18 +233,6 @@ class AgenticRAG:
             })
         messages.append({"role": "user", "content": question})
         return messages
-
-    def _build_references(self) -> tuple[list[dict], float]:
-        references = []
-        for c in self._citations:
-            references.append({
-                "id": c.get("document_id", ""),
-                "title": c.get("filename", ""),
-                "section": c.get("section", ""),
-                "excerpt": c.get("excerpt", ""),
-            })
-        avg_sim = sum(self._all_similarities) / len(self._all_similarities) if self._all_similarities else 0.0
-        return references, avg_sim
 
     async def run(self, question: str, conversation_history: list[dict]) -> AsyncGenerator[str, None]:
         messages = self._build_messages(question, conversation_history)
@@ -340,9 +278,7 @@ class AgenticRAG:
                         "input": tool_input,
                     })
 
-                    # cite_sources/suggest_followups はUI上ではステップ表示しない
-                    hidden_tools = {"cite_sources", "suggest_followups"}
-                    if tool_name not in hidden_tools:
+                    if tool_name != "suggest_followups":
                         yield _sse({"step": {
                             "tool": tool_name,
                             "status": "running",
@@ -354,12 +290,15 @@ class AgenticRAG:
                     summary = self._summarize_result(tool_name, result)
                     self._trace[-1]["summary"] = summary
 
-                    if tool_name not in hidden_tools:
+                    if tool_name != "suggest_followups":
                         yield _sse({"step": {
                             "tool": tool_name,
                             "status": "done",
                             "summary": summary,
                         }})
+
+                    if tool_name == "search_knowledge" and self._sources:
+                        yield _sse({"sources": self._sources})
 
                     tool_results.append({
                         "type": "tool_result",
@@ -372,18 +311,15 @@ class AgenticRAG:
             else:
                 yield _sse({"token": "情報の検索に時間がかかっています。取得できた情報に基づいて回答します。"})
 
-            references, avg_similarity = self._build_references()
             yield _sse({
                 "done": True,
-                "references": references,
-                "avg_similarity": round(avg_similarity, 3),
                 "followups": self._followups,
                 "agentic_trace": self._trace,
             })
         except (anthropic.APIError, anthropic.APIConnectionError) as e:
             logger.error("Anthropic API error: %s", e)
             yield _sse({"token": "AIサービスとの通信中にエラーが発生しました。しばらくしてから再度お試しください。"})
-            yield _sse({"done": True, "references": [], "avg_similarity": 0, "followups": [], "agentic_trace": self._trace})
+            yield _sse({"done": True, "followups": [], "agentic_trace": self._trace})
 
     @staticmethod
     def _summarize_result(tool_name: str, result_json: str) -> str:
@@ -405,9 +341,6 @@ class AgenticRAG:
         elif tool_name == "list_documents":
             docs = data.get("documents", [])
             return f"{len(docs)}件のドキュメント一覧を取得"
-        elif tool_name == "cite_sources":
-            count = data.get("registered", 0)
-            return f"{count}件の出典を登録"
         elif tool_name == "suggest_followups":
             count = data.get("count", 0)
             return f"{count}件のフォローアップ質問を提案"

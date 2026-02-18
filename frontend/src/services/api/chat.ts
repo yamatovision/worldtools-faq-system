@@ -5,12 +5,11 @@ function getAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export interface ChatReference {
-  id: string;
-  title: string;
-  similarity?: number;
-  section?: string;
-  excerpt?: string;
+export interface SourceCard {
+  document_id: string;
+  filename: string;
+  preview: string;
+  similarity: number;
 }
 
 export interface AgentStep {
@@ -22,12 +21,11 @@ export interface AgentStep {
 
 export type ChatStreamEvent =
   | { type: 'token'; token: string }
-  | { type: 'step'; step: AgentStep };
+  | { type: 'step'; step: AgentStep }
+  | { type: 'sources'; sources: SourceCard[] };
 
 export interface ChatStreamResult {
   chatId: string;
-  references: ChatReference[];
-  avgSimilarity?: number;
   followups: string[];
 }
 
@@ -63,8 +61,6 @@ export async function* streamChat(
 
   const decoder = new TextDecoder();
   let chatId = '';
-  let references: ChatReference[] = [];
-  let avgSimilarity: number | undefined;
   let followups: string[] = [];
   let buffer = '';
 
@@ -83,12 +79,13 @@ export async function* streamChat(
           if (data.step) {
             yield { type: 'step', step: data.step as AgentStep };
           }
+          if (data.sources) {
+            yield { type: 'sources', sources: data.sources as SourceCard[] };
+          }
           if (data.token) {
             yield { type: 'token', token: data.token };
           }
           if (data.done) {
-            references = data.references || [];
-            avgSimilarity = data.avg_similarity;
             followups = data.followups || [];
           }
           if (data.chat_id && !data.done) {
@@ -101,7 +98,7 @@ export async function* streamChat(
     }
   }
 
-  return { chatId, references, avgSimilarity, followups };
+  return { chatId, followups };
 }
 
 export async function sendFeedback(chatId: string, feedback: 'good' | 'bad'): Promise<void> {
