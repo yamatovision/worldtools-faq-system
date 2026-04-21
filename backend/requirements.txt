@@ -39,7 +39,7 @@ paramiko>=3.4.0
 locust>=2.32.0
 
 # Utilities
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 pydantic==2.10.4
 pydantic-settings>=2.10.1
 aiofiles==24.1.0
